@@ -59,9 +59,9 @@ Candidate resumes are isolated from the repository code in a dedicated persisten
 2. **Streamable HTTP Transport (`dist/index.cjs`)**:
    - **Path**: `/mcp` on port `8080`.
    - **Session model**: Stateless. Each POST to `/mcp` creates a server instance responding to client requests.
-3. **Upstream Fallback & Direct Delegation**:
-   - When `LINKEDIN_ENGINE=upstream` or `LINKEDIN_USE_UPSTREAM=true` is set, `scripts/launcher.cjs` delegates directly to `uvx mcp-server-linkedin@latest` with automated session flags (`--import-from-browser auto`, `--headless`).
-   - In default mode (`LINKEDIN_ENGINE=native`), the launcher executes the self-contained native bundle and falls back gracefully to `uvx mcp-server-linkedin@latest` if local binaries are absent.
+3. **Upstream Delegation & Native Fallback**:
+   - By default (`LINKEDIN_ENGINE=upstream` or `LINKEDIN_USE_UPSTREAM=true`), `scripts/launcher.cjs` delegates directly to `uvx mcp-server-linkedin@latest` with automated session flags (`--import-from-browser auto`, `--headless`).
+   - When explicitly configured (`LINKEDIN_ENGINE=native`), the launcher executes the self-contained native bundle (`dist/bin.cjs`).
 
 ---
 
@@ -69,11 +69,9 @@ Candidate resumes are isolated from the repository code in a dedicated persisten
 
 | Variable               | Required | Default               | Description                                           |
 | :--------------------- | :------: | :-------------------- | :---------------------------------------------------- |
-| `LINKEDIN_ENGINE`      |    No    | `native`              | Engine selector: `native` (in-house) or `upstream` (`uvx`). |
-| `LINKEDIN_USE_UPSTREAM`|    No    | `false`               | Flag to force upstream `uvx mcp-server-linkedin` runner.|
+| `LINKEDIN_ENGINE`      |    No    | `upstream`            | Engine selector: `upstream` (`uvx`) or `native` (in-house). |
+| `LINKEDIN_USE_UPSTREAM`|    No    | `true`                | Flag to force upstream `uvx mcp-server-linkedin` runner.|
 | `LINKEDIN_BROWSER`     |    No    | `auto`                | Browser for session cookie auto-import (`auto`, `chrome`, `edge`, `brave`). |
 | `LINKEDIN_HEADLESS`    |    No    | `true`                | Runs upstream browser in headless mode (`false` for visible GUI). |
 | `LINKEDIN_RESUMES_DIR` |    No    | `$PLUGIN_DATA/resumes`| Directory storing candidate resumes and cover letters.|
 | `LINKEDIN_SESSION_COOKIE` | No    | (Auto-import)         | Raw `li_at` cookie value for authentication.          |
-| `MESH_PROFILE`         |    No    | `local`               | `local` or `cluster`.                                 |
-| `CORTEX_GATEWAY_URL`   |    No    | `http://localhost:8080`| Centralized Cortex Gateway URL in cluster mode.      |

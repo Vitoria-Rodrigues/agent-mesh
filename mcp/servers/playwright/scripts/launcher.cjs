@@ -60,15 +60,44 @@ function spawnCommand(bin, args, options = {}) {
 }
 
 const forwardedArgs = process.argv.slice(2);
-const profile = process.env.MESH_PROFILE || 'local';
-const isClusterMode = profile === 'cluster' || process.env.CORTEX_GATEWAY_ENABLED === 'true';
-const gatewayBaseUrl = process.env.CORTEX_GATEWAY_URL || 'http://localhost:8080';
+const isNativeRequested = (process.env.PLAYWRIGHT_ENGINE || '').trim().toLowerCase() === 'native';
 
-if (isClusterMode) {
-  process.stderr.write(`[launcher:mcp-${SERVER_NAME}] Engaging cluster gateway via ${gatewayBaseUrl}/mcp\n`);
-  const child = spawnCommand('npx', ['-y', 'mcp-remote', `${gatewayBaseUrl}/mcp`]);
+function runUpstreamPlaywright() {
+  const mode = process.env.PLAYWRIGHT_MODE || 'auto';
+  const hasExtensionToken = Boolean(
+    process.env.PLAYWRIGHT_MCP_EXTENSION_TOKEN &&
+    process.env.PLAYWRIGHT_MCP_EXTENSION_TOKEN.trim()
+  );
+  const effectiveMode = (mode === 'auto')
+    ? (hasExtensionToken ? 'extension' : 'headless')
+    : mode;
+
+  const resolvedArgs = [];
+  if (effectiveMode === 'extension') {
+    resolvedArgs.push('--extension');
+  } else if (effectiveMode === 'cdp') {
+    resolvedArgs.push('--cdp-endpoint', process.env.PLAYWRIGHT_CDP_URL || 'http://localhost:9222');
+  } else if (effectiveMode === 'channel') {
+    resolvedArgs.push('--browser', process.env.PLAYWRIGHT_CHANNEL || 'chrome');
+    if (process.env.PLAYWRIGHT_HEADLESS === 'true') {
+      resolvedArgs.push('--headless');
+    }
+  } else {
+    const pluginDataDir = process.env.PLUGIN_DATA || path.resolve(process.cwd(), '.agent-data');
+    resolvedArgs.push('--user-data-dir', path.join(pluginDataDir, 'browser-profile'), '--headless');
+  }
+
+  if (process.env.PLAYWRIGHT_MCP_EXECUTABLE_PATH) {
+    resolvedArgs.push('--executable-path', process.env.PLAYWRIGHT_MCP_EXECUTABLE_PATH);
+  }
+
+  resolvedArgs.push(...forwardedArgs);
+  process.stderr.write(`[launcher:mcp-${SERVER_NAME}] Engaging primary Playwright MCP in '${effectiveMode}' mode\n`);
+  const child = spawnCommand('npx', ['-y', '@playwright/mcp@0.0.84', ...resolvedArgs]);
   child.on('exit', (code) => process.exit(code || 0));
-} else {
+}
+
+if (isNativeRequested) {
   let hasLocalPlaywright = false;
   try {
     require.resolve('playwright', { paths: [process.cwd(), __dirname, path.resolve(__dirname, '..')] });
@@ -93,38 +122,8 @@ if (isClusterMode) {
     const child = spawnCommand('npx', ['-y', 'tsx', srcTsBin, ...forwardedArgs]);
     child.on('exit', (code) => process.exit(code || 0));
   } else {
-    // Upstream fallback
-    const mode = process.env.PLAYWRIGHT_MODE || 'auto';
-    const hasExtensionToken = Boolean(
-      process.env.PLAYWRIGHT_MCP_EXTENSION_TOKEN &&
-      process.env.PLAYWRIGHT_MCP_EXTENSION_TOKEN.trim()
-    );
-    const effectiveMode = (mode === 'auto')
-      ? (hasExtensionToken ? 'extension' : 'headless')
-      : mode;
-
-    const resolvedArgs = [];
-    if (effectiveMode === 'extension') {
-      resolvedArgs.push('--extension');
-    } else if (effectiveMode === 'cdp') {
-      resolvedArgs.push('--cdp-endpoint', process.env.PLAYWRIGHT_CDP_URL || 'http://localhost:9222');
-    } else if (effectiveMode === 'channel') {
-      resolvedArgs.push('--browser', process.env.PLAYWRIGHT_CHANNEL || 'chrome');
-      if (process.env.PLAYWRIGHT_HEADLESS === 'true') {
-        resolvedArgs.push('--headless');
-      }
-    } else {
-      const pluginDataDir = process.env.PLUGIN_DATA || path.resolve(process.cwd(), '.agent-data');
-      resolvedArgs.push('--user-data-dir', path.join(pluginDataDir, 'browser-profile'), '--headless');
-    }
-
-    if (process.env.PLAYWRIGHT_MCP_EXECUTABLE_PATH) {
-      resolvedArgs.push('--executable-path', process.env.PLAYWRIGHT_MCP_EXECUTABLE_PATH);
-    }
-
-    resolvedArgs.push(...forwardedArgs);
-    process.stderr.write(`[launcher:mcp-${SERVER_NAME}] Engaging upstream Playwright MCP in '${effectiveMode}' mode\n`);
-    const child = spawnCommand('npx', ['-y', '@playwright/mcp@0.0.84', ...resolvedArgs]);
-    child.on('exit', (code) => process.exit(code || 0));
+    runUpstreamPlaywright();
   }
+} else {
+  runUpstreamPlaywright();
 }

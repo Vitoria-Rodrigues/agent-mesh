@@ -37,10 +37,7 @@ Located at `<plugin_root>/mcp_config.json`:
     "server-name": {
       "command": "node",
       "args": ["./scripts/launcher.cjs", "server-name"],
-      "env": {
-        "CORTEX_GATEWAY_URL": "http://localhost:8080",
-        "CORTEX_PROBE_TIMEOUT_MS": "300"
-      }
+      "env": {}
     }
   }
 }

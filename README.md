@@ -207,13 +207,13 @@ agy plugin install https://github.com/Vitoria-Rodrigues/agent-mesh --path plugin
 Every MCP server and domain plugin operates with complete runtime independence:
 
 1. **Inlined Self-Contained CJS Bundles (`mcp/servers/*/dist/bin.cjs`)**:
-   Built with `tsup` (`noExternal`), all 8 MCP servers inline `@modelcontextprotocol/sdk`, `@octokit/*`, `fastify`, `zod`, and `dotenv`. Consumer repositories do not need to install MCP SDK dependencies.
+   Built with `tsup` (`noExternal`), all MCP servers inline `@modelcontextprotocol/sdk`, `@octokit/*`, `fastify`, `zod`, and `dotenv`. Consumer repositories do not need to install MCP SDK dependencies.
 2. **Sovereign MCP Launchers (`mcp/servers/*/scripts/launcher.cjs`)**:
-   Each MCP server ships its own `scripts/launcher.cjs`, `mcp.json`, and `bin` entry (`mcp-<name>`), loading `.env` variables in cascade and spawning its co-located `dist/bin.cjs`.
+   Each MCP server ships its own `scripts/launcher.cjs`, `mcp.json`, and `bin` entry (`mcp-<name>`), loading `.env` variables in cascade and spawning its co-located `dist/bin.cjs` or delegating to upstream packages.
 3. **Decoupled Plugin Launchers (`plugins/packages/*/scripts/launcher.cjs`)**:
-   Each plugin launcher dynamically locates its target MCP server via `resolveMcpLauncher()` (checking standalone `@vitoria-rodrigues/mcp-<name>` -> umbrella `node_modules/@vitoria-rodrigues/agent-mesh/mcp/servers/<name>` -> monorepo sibling) or routes to the Kubernetes Cortex Gateway (`MESH_PROFILE=cluster`).
-4. **Playwright Resilient Fallback**:
-   When `mcp-playwright` is invoked inside a consumer repository that does not install `playwright` locally, `mcp/servers/playwright/scripts/launcher.cjs` automatically falls back to `npx -y @playwright/mcp@0.0.84` with all configured mode flags (`headless`, `extension`, `channel`, `cdp`).
+   Each plugin launcher dynamically locates its target MCP server via `resolveMcpLauncher()` (checking standalone `@vitoria-rodrigues/mcp-<name>` -> umbrella `node_modules/@vitoria-rodrigues/agent-mesh/mcp/servers/<name>` -> monorepo sibling) or upstream packages.
+4. **Playwright and LinkedIn Upstream Delegation**:
+   Launchers automatically execute verified upstream runners (`npx -y @playwright/mcp@0.0.84` and `uvx mcp-server-linkedin@latest`) with session auto-import and browser profile support, falling back to local bundles when requested.
 
 For full technical details, consult:
 - [How to Consume Plugins in Antigravity and Claude Code](./references/how-to-guides/consuming-plugins-in-antigravity-and-claude.md)

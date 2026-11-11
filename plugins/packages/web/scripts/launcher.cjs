@@ -94,59 +94,60 @@ function resolveMcpLauncher(pkgName, monorepoDir) {
 const targetService = process.argv[2];
 const forwardedArgs = process.argv.slice(3);
 
-const profile = process.env.MESH_PROFILE || 'local';
-const isClusterMode = profile === 'cluster' || process.env.CORTEX_GATEWAY_ENABLED === 'true';
-const gatewayBaseUrl = process.env.CORTEX_GATEWAY_URL || 'http://localhost:8080';
+function runUpstreamPlaywright(forwardedArgs) {
+  const mode = process.env.PLAYWRIGHT_MODE || 'auto';
+  const hasExtensionToken = Boolean(
+    process.env.PLAYWRIGHT_MCP_EXTENSION_TOKEN &&
+    process.env.PLAYWRIGHT_MCP_EXTENSION_TOKEN.trim()
+  );
+  const effectiveMode = (mode === 'auto')
+    ? (hasExtensionToken ? 'extension' : 'headless')
+    : mode;
 
-if (isClusterMode) {
-  process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging cluster gateway for '${targetService}' via ${gatewayBaseUrl}/mcp\n`);
-  const child = spawnCommand('npx', ['-y', 'mcp-remote', `${gatewayBaseUrl}/mcp`]);
-  child.on('exit', (code) => process.exit(code || 0));
-} else if (targetService === 'playwright') {
-  const resolved = resolveMcpLauncher('@vitoria-rodrigues/mcp-playwright', 'playwright');
-
-  if (resolved && (resolved.type === 'launcher' || resolved.type === 'bin')) {
-    process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging sovereign Playwright MCP: node ${resolved.path}\n`);
-    const child = spawn(process.execPath, [resolved.path, ...forwardedArgs], {
-      stdio: 'inherit',
-      shell: false,
-      env: process.env
-    });
-    child.on('exit', (code) => process.exit(code || 0));
+  const resolvedArgs = [];
+  if (effectiveMode === 'extension') {
+    resolvedArgs.push('--extension');
+  } else if (effectiveMode === 'cdp') {
+    resolvedArgs.push('--cdp-endpoint', process.env.PLAYWRIGHT_CDP_URL || 'http://localhost:9222');
+  } else if (effectiveMode === 'channel') {
+    resolvedArgs.push('--browser', process.env.PLAYWRIGHT_CHANNEL || 'chrome');
+    if (process.env.PLAYWRIGHT_HEADLESS === 'true') {
+      resolvedArgs.push('--headless');
+    }
   } else {
-    // Upstream fallback
-    const mode = process.env.PLAYWRIGHT_MODE || 'auto';
-    const hasExtensionToken = Boolean(
-      process.env.PLAYWRIGHT_MCP_EXTENSION_TOKEN &&
-      process.env.PLAYWRIGHT_MCP_EXTENSION_TOKEN.trim()
-    );
-    const effectiveMode = (mode === 'auto')
-      ? (hasExtensionToken ? 'extension' : 'headless')
-      : mode;
+    const pluginDataDir = process.env.PLUGIN_DATA || path.resolve(process.cwd(), '.agent-data');
+    resolvedArgs.push('--user-data-dir', path.join(pluginDataDir, 'browser-profile'), '--headless');
+  }
 
-    const resolvedArgs = [];
-    if (effectiveMode === 'extension') {
-      resolvedArgs.push('--extension');
-    } else if (effectiveMode === 'cdp') {
-      resolvedArgs.push('--cdp-endpoint', process.env.PLAYWRIGHT_CDP_URL || 'http://localhost:9222');
-    } else if (effectiveMode === 'channel') {
-      resolvedArgs.push('--browser', process.env.PLAYWRIGHT_CHANNEL || 'chrome');
-      if (process.env.PLAYWRIGHT_HEADLESS === 'true') {
-        resolvedArgs.push('--headless');
-      }
+  if (process.env.PLAYWRIGHT_MCP_EXECUTABLE_PATH) {
+    resolvedArgs.push('--executable-path', process.env.PLAYWRIGHT_MCP_EXECUTABLE_PATH);
+  }
+
+  resolvedArgs.push(...forwardedArgs);
+  process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging primary Playwright MCP in '${effectiveMode}' mode\n`);
+  const child = spawnCommand('npx', ['-y', '@playwright/mcp@0.0.84', ...resolvedArgs]);
+  child.on('exit', (code) => process.exit(code || 0));
+}
+
+if (targetService === 'playwright') {
+  const isNativeRequested = (process.env.PLAYWRIGHT_ENGINE || '').trim().toLowerCase() === 'native';
+
+  if (isNativeRequested) {
+    const resolved = resolveMcpLauncher('@vitoria-rodrigues/mcp-playwright', 'playwright');
+    if (resolved && (resolved.type === 'launcher' || resolved.type === 'bin')) {
+      process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging sovereign Playwright MCP: node ${resolved.path}\n`);
+      const child = spawn(process.execPath, [resolved.path, ...forwardedArgs], {
+        stdio: 'inherit',
+        shell: false,
+        env: process.env
+      });
+      child.on('exit', (code) => process.exit(code || 0));
     } else {
-      const pluginDataDir = process.env.PLUGIN_DATA || path.resolve(process.cwd(), '.agent-data');
-      resolvedArgs.push('--user-data-dir', path.join(pluginDataDir, 'browser-profile'), '--headless');
+      runUpstreamPlaywright(forwardedArgs);
     }
-
-    if (process.env.PLAYWRIGHT_MCP_EXECUTABLE_PATH) {
-      resolvedArgs.push('--executable-path', process.env.PLAYWRIGHT_MCP_EXECUTABLE_PATH);
-    }
-
-    resolvedArgs.push(...forwardedArgs);
-    process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging Playwright MCP in '${effectiveMode}' mode\n`);
-    const child = spawnCommand('npx', ['-y', '@playwright/mcp@0.0.84', ...resolvedArgs]);
-    child.on('exit', (code) => process.exit(code || 0));
+  } else {
+    // Primary execution: upstream runner
+    runUpstreamPlaywright(forwardedArgs);
   }
 } else if (targetService === 'firecrawl') {
   const resolved = resolveMcpLauncher('@vitoria-rodrigues/mcp-firecrawl', 'firecrawl');

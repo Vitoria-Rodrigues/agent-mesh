@@ -180,64 +180,51 @@ const SERVICE_CONFIGS = {
 const targetService = process.argv[2] || 'linkedin';
 const forwardedArgs = process.argv.slice(3);
 
-const profile = process.env.MESH_PROFILE || 'local';
-const isClusterMode = profile === 'cluster' || process.env.CORTEX_GATEWAY_ENABLED === 'true';
-const gatewayBaseUrl = process.env.CORTEX_GATEWAY_URL || 'http://localhost:8080';
+const isNativeRequested = (process.env.LINKEDIN_ENGINE || '').trim().toLowerCase() === 'native';
 
-if (isClusterMode) {
-  process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging cluster gateway via ${gatewayBaseUrl}/mcp\n`);
-  const child = spawnCommand('npx', ['-y', 'mcp-remote', `${gatewayBaseUrl}/mcp`]);
-  child.on('exit', (code) => process.exit(code || 0));
-} else {
-  const serviceConfig = SERVICE_CONFIGS[targetService];
-  if (!serviceConfig) {
-    process.stderr.write(`[launcher:${PLUGIN_NAME}] Unknown target service: ${targetService}\n`);
-    process.exit(1);
-  }
+if (isNativeRequested) {
+  const resolved = resolveMcpLauncher(serviceConfig.pkg, serviceConfig.monorepoDir);
 
-  if (targetService === 'linkedin' && isUpstreamEngineRequested()) {
+  if (resolved) {
+    let child;
+    if (resolved.type === 'launcher') {
+      child = spawn(process.execPath, [resolved.path, ...forwardedArgs], {
+        stdio: 'inherit',
+        shell: false,
+        env: process.env
+      });
+    } else if (resolved.type === 'bin') {
+      child = spawn(process.execPath, [resolved.path, ...forwardedArgs], {
+        stdio: 'inherit',
+        shell: false,
+        env: process.env
+      });
+    } else if (resolved.type === 'ts') {
+      child = spawnCommand('npx', ['-y', 'tsx', resolved.path, ...forwardedArgs]);
+    }
+    child.on('exit', (code) => process.exit(code || 0));
+    child.on('error', (err) => {
+      process.stderr.write(`[launcher:${PLUGIN_NAME}] Failed to spawn resolved launcher for '${targetService}': ${err.message}\n`);
+      process.exit(1);
+    });
+  } else {
     const upstreamArgs = resolveUpstreamArgs(forwardedArgs);
-    process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging upstream engine for '${targetService}': uvx ${upstreamArgs.join(' ')}\n`);
+    process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging primary upstream runner for '${targetService}': uvx ${upstreamArgs.join(' ')}\n`);
     const child = spawnCommand('uvx', upstreamArgs);
     child.on('exit', (code) => process.exit(code || 0));
     child.on('error', (err) => {
       process.stderr.write(`[launcher:${PLUGIN_NAME}] Upstream uvx runner failed: ${err.message}. Ensure uv is installed.\n`);
       process.exit(1);
     });
-  } else {
-    const resolved = resolveMcpLauncher(serviceConfig.pkg, serviceConfig.monorepoDir);
-
-    if (resolved) {
-      let child;
-      if (resolved.type === 'launcher') {
-        child = spawn(process.execPath, [resolved.path, ...forwardedArgs], {
-          stdio: 'inherit',
-          shell: false,
-          env: process.env
-        });
-      } else if (resolved.type === 'bin') {
-        child = spawn(process.execPath, [resolved.path, ...forwardedArgs], {
-          stdio: 'inherit',
-          shell: false,
-          env: process.env
-        });
-      } else if (resolved.type === 'ts') {
-        child = spawnCommand('npx', ['-y', 'tsx', resolved.path, ...forwardedArgs]);
-      }
-      child.on('exit', (code) => process.exit(code || 0));
-      child.on('error', (err) => {
-        process.stderr.write(`[launcher:${PLUGIN_NAME}] Failed to spawn resolved launcher for '${targetService}': ${err.message}\n`);
-        process.exit(1);
-      });
-    } else {
-      const upstreamArgs = resolveUpstreamArgs(forwardedArgs);
-      process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging upstream fallback runner for '${targetService}': uvx ${upstreamArgs.join(' ')}\n`);
-      const child = spawnCommand('uvx', upstreamArgs);
-      child.on('exit', (code) => process.exit(code || 0));
-      child.on('error', (err) => {
-        process.stderr.write(`[launcher:${PLUGIN_NAME}] Upstream fallback failed: ${err.message}. Ensure uv is installed.\n`);
-        process.exit(1);
-      });
-    }
   }
+} else {
+  // Primary execution: upstream runner
+  const upstreamArgs = resolveUpstreamArgs(forwardedArgs);
+  process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging primary upstream runner for '${targetService}': uvx ${upstreamArgs.join(' ')}\n`);
+  const child = spawnCommand('uvx', upstreamArgs);
+  child.on('exit', (code) => process.exit(code || 0));
+  child.on('error', (err) => {
+    process.stderr.write(`[launcher:${PLUGIN_NAME}] Upstream uvx runner failed: ${err.message}. Ensure uv is installed.\n`);
+    process.exit(1);
+  });
 }

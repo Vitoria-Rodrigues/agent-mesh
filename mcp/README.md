@@ -10,7 +10,7 @@ The `mcp/` subsystem enforces **Subsystem-Internal Partitioning** and **Self-Con
 - **Deployable MCP Servers (`mcp/servers/*`)**: Independent, versioned TypeScript packages bundled via `tsup` (`noExternal`) into standalone CommonJS executables implementing a **Dual-Transport Architecture**:
   1. **Streamable HTTP Transport (`src/index.ts` -> `dist/index.cjs`)**: Fastify HTTP server listening on `:8080` (or `PORT` environment variable) serving `/mcp` endpoints for Kubernetes cluster deployments.
   2. **Stdio Transport (`src/bin.ts` -> `dist/bin.cjs`)**: Self-contained CLI runner inlining `@modelcontextprotocol/sdk` and runtime dependencies, connecting via standard input/output with diagnostic logging routed to `stderr`.
-  3. **Sovereign Launcher (`scripts/launcher.cjs` & `mcp.json`)**: Co-located launcher script exposed as the package `bin` (`mcp-<name>`) that loads `.env` in cascade, supports cluster gateway failover (`MESH_PROFILE=cluster`), and spawns `dist/bin.cjs` with zero external dependencies.
+  3. **Sovereign Launcher (`scripts/launcher.cjs` & `mcp.json`)**: Co-located launcher script exposed as the package `bin` (`mcp-<name>`) that loads `.env` in cascade, manages upstream delegation or native bundles, and spawns executables with zero external dependencies.
 - **Shared Core Libraries (`mcp/core/*`)**: Non-executable TypeScript libraries shared across multiple domain-scoped MCP servers via `workspace:*` and bundled directly into downstream server executables at build time.
 
 ---

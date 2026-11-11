@@ -63,11 +63,9 @@ plugins/packages/linkedin/
 
 | Variable               | Required | Default               | Description                                           |
 | :--------------------- | :------: | :-------------------- | :---------------------------------------------------- |
-| `LINKEDIN_ENGINE`      |    No    | `native`              | Engine selector: `native` (in-house) or `upstream` (`uvx`). |
-| `LINKEDIN_USE_UPSTREAM`|    No    | `false`               | Flag to force upstream `uvx mcp-server-linkedin` runner.|
+| `LINKEDIN_ENGINE`      |    No    | `upstream`            | Engine selector: `upstream` (`uvx`) or `native` (in-house). |
+| `LINKEDIN_USE_UPSTREAM`|    No    | `true`                | Flag to force upstream `uvx mcp-server-linkedin` runner.|
 | `LINKEDIN_BROWSER`     |    No    | `auto`                | Browser for session cookie auto-import (`auto`, `chrome`, `edge`, `brave`). |
 | `LINKEDIN_HEADLESS`    |    No    | `true`                | Runs upstream browser in headless mode (`false` for visible GUI). |
 | `LINKEDIN_RESUMES_DIR` |    No    | `$PLUGIN_DATA/resumes`| Directory storing candidate resumes and cover letters.|
 | `LINKEDIN_SESSION_COOKIE` | No    | (Auto-import)         | Raw `li_at` cookie value for authentication.          |
-| `MESH_PROFILE`         |    No    | `local`               | `local` or `cluster`.                                 |
-| `CORTEX_GATEWAY_URL`   |    No    | `http://localhost:8080`| Centralized Cortex Gateway URL in cluster mode.      |

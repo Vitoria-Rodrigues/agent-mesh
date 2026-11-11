@@ -113,34 +113,24 @@ if (!serviceConfig) {
   process.exit(1);
 }
 
-const profile = process.env.MESH_PROFILE || 'local';
-const isClusterMode = profile === 'cluster' || process.env.CORTEX_GATEWAY_ENABLED === 'true';
-const gatewayBaseUrl = process.env.CORTEX_GATEWAY_URL || 'http://localhost:8080';
+const resolved = resolveMcpLauncher(serviceConfig.pkg, serviceConfig.monorepoDir);
 
-if (isClusterMode) {
-  process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging cluster gateway for '${targetService}' via ${gatewayBaseUrl}/mcp\n`);
-  const child = spawnCommand('npx', ['-y', 'mcp-remote', `${gatewayBaseUrl}/mcp`]);
-  child.on('exit', (code) => process.exit(code || 0));
-} else {
-  const resolved = resolveMcpLauncher(serviceConfig.pkg, serviceConfig.monorepoDir);
-
-  if (resolved) {
-    if (resolved.type === 'launcher' || resolved.type === 'bin') {
-      process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging sovereign MCP executable for '${targetService}': node ${resolved.path}\n`);
-      const child = spawn(process.execPath, [resolved.path, ...forwardedArgs], {
-        stdio: 'inherit',
-        shell: false,
-        env: process.env
-      });
-      child.on('exit', (code) => process.exit(code || 0));
-    } else if (resolved.type === 'ts') {
-      process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging monorepo TypeScript binary for '${targetService}': tsx ${resolved.path}\n`);
-      const child = spawnCommand('npx', ['-y', 'tsx', resolved.path, ...forwardedArgs]);
-      child.on('exit', (code) => process.exit(code || 0));
-    }
-  } else {
-    process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging standalone package for '${targetService}': npx -y ${serviceConfig.pkg}\n`);
-    const child = spawnCommand('npx', ['-y', serviceConfig.pkg, ...forwardedArgs]);
+if (resolved) {
+  if (resolved.type === 'launcher' || resolved.type === 'bin') {
+    process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging sovereign MCP executable for '${targetService}': node ${resolved.path}\n`);
+    const child = spawn(process.execPath, [resolved.path, ...forwardedArgs], {
+      stdio: 'inherit',
+      shell: false,
+      env: process.env
+    });
+    child.on('exit', (code) => process.exit(code || 0));
+  } else if (resolved.type === 'ts') {
+    process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging monorepo TypeScript binary for '${targetService}': tsx ${resolved.path}\n`);
+    const child = spawnCommand('npx', ['-y', 'tsx', resolved.path, ...forwardedArgs]);
     child.on('exit', (code) => process.exit(code || 0));
   }
+} else {
+  process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging standalone package for '${targetService}': npx -y ${serviceConfig.pkg}\n`);
+  const child = spawnCommand('npx', ['-y', serviceConfig.pkg, ...forwardedArgs]);
+  child.on('exit', (code) => process.exit(code || 0));
 }

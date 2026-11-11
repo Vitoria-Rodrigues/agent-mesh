@@ -17,7 +17,7 @@ This bounded context encapsulates the in-house Model Context Protocol server pro
 - [tsup.config.ts](./tsup.config.ts): Declarative `tsup` configuration bundling dependencies (`noExternal`) into `dist/bin.cjs` and `dist/index.cjs`.
 - [src/bin.ts](./src/bin.ts): Stdio transport entrypoint executing the MCP server over standard input/output.
 - [src/index.ts](./src/index.ts): Fastify Streamable HTTP transport entrypoint serving `/mcp` on port `8080`.
-- [src/config.ts](./src/config.ts): Configuration schema via Zod (`LINKEDIN_RESUMES_DIR`, `LINKEDIN_SESSION_COOKIE`, `CORTEX_GATEWAY_URL`).
+- [src/config.ts](./src/config.ts): Configuration schema via Zod (`LINKEDIN_RESUMES_DIR`, `LINKEDIN_SESSION_COOKIE`, `LINKEDIN_ENGINE`, `LINKEDIN_USE_UPSTREAM`).
 - [src/resumes/resume-manager.ts](./src/resumes/resume-manager.ts): Candidate resume discovery, indexing, and text parsing engine.
 - [src/tools/profile.tools.ts](./src/tools/profile.tools.ts): `get_my_profile`, `get_person_profile` - Profile extraction and ATS keyword alignment.
 - [src/tools/job.tools.ts](./src/tools/job.tools.ts): `search_jobs`, `get_job_details`, `dismiss_job` - Job search and semantic triage.

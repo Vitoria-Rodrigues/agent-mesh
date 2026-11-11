@@ -108,13 +108,13 @@ Every domain plugin (`plugins/packages/<plugin>/scripts/launcher.cjs`) and every
 
 1. **Environment Cascade (`loadEnvCascade()`)**:
    Automatically loads environment variables from the consumer repository's `.env` (`process.cwd()/.env`) and parent directories without overwriting variables already set in the process environment.
-2. **Cluster Gateway Routing (`MESH_PROFILE=cluster`)**:
-   When `MESH_PROFILE=cluster` or `CORTEX_GATEWAY_ENABLED=true`, the launcher delegates tool execution to the centralized Kubernetes Cortex Gateway (`npx -y mcp-remote ${CORTEX_GATEWAY_URL}/mcp`).
-3. **Three-Layer Sovereign Local Resolution (`resolveMcpLauncher()`)**:
-   When running in `local` profile (default), plugin launchers resolve the target MCP server deterministically across three layers:
+2. **Three-Layer Sovereign Local Resolution (`resolveMcpLauncher()`)**:
+   Plugin launchers resolve the target MCP server deterministically across three layers:
    - **Layer 1 (Standalone Package)**: Resolves `@vitoria-rodrigues/mcp-<name>/package.json` if installed individually in the consumer repository.
    - **Layer 2 (Umbrella Package Hierarchy)**: Resolves `mcp/servers/<name>/scripts/launcher.cjs` (and co-located `dist/bin.cjs`) directly inside `node_modules/@vitoria-rodrigues/agent-mesh`.
    - **Layer 3 (Monorepo Sibling)**: Resolves `mcp/servers/<name>/scripts/launcher.cjs` when developing inside the `agent-mesh` repository.
+3. **Upstream Runner Priority**:
+   For tools with mature ecosystem runners (such as Playwright and LinkedIn), launchers prioritize upstream packages (`@playwright/mcp`, `mcp-server-linkedin`) with automated session auto-import and browser profile isolation.
 4. **Inlined Self-Contained CJS Bundles (`dist/bin.cjs`)**:
    All MCP servers are bundled with `tsup` (`noExternal`), inlining `@modelcontextprotocol/sdk`, `@octokit/*`, `fastify`, `zod`, and `dotenv` into a single CommonJS executable. Consumer repositories never need to install MCP SDK dependencies.
 5. **Playwright Resilient Fallback**:

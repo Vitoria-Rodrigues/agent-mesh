@@ -33,7 +33,7 @@ Enterprise Antigravity and Claude Code domain plugin for dynamic multi-mode Play
 - [skills/web-extractor/SKILL.md](./skills/web-extractor/SKILL.md): Web scraping and markdown extraction runbook.
 - [references/playwright-mcp-tool-catalog.md](./references/playwright-mcp-tool-catalog.md): Complete Playwright MCP tool parameter and return type catalog.
 - [mcp.json](./mcp.json): Agent Plugins 1.0.0 stdio bindings routing `playwright` and `firecrawl` through `launcher.cjs`.
-- [mcp_config.json](./mcp_config.json): Native Antigravity MCP router bindings targeting `launcher.cjs` with cluster gateway failover.
+- [mcp_config.json](./mcp_config.json): Native Antigravity MCP router bindings targeting `launcher.cjs`.
 
 ---
 
@@ -50,7 +50,6 @@ The plugin dynamically configures Playwright based on environment variables load
 | `PLAYWRIGHT_HEADLESS` | `false` | `true`, `false` | Headless flag for channel and standalone runs. |
 | `PLAYWRIGHT_CDP_URL` | `http://localhost:9222` | URL | Remote debugging endpoint for CDP mode. |
 | `FIRECRAWL_API_KEY` | *(none)* | String | API key for Firecrawl web scraping. |
-| `MESH_PROFILE` | `local` | `local`, `cluster` | `local` spawns stdio processes; `cluster` routes through Cortex Gateway. |
 
 ---
 

@@ -39,8 +39,6 @@ The underlying MCP servers consumed by this plugin require the following environ
 | :--- | :--- | :--- |
 | `GITHUB_TOKEN` | Yes (or Tier 3 Device Flow) | Developer Personal Access Token or OAuth User Access Token with repo scopes. |
 | `DEVELOPER_TOOLS_APP_CLIENT_ID` | Optional | Tier 3 OAuth Client ID for `vitoria-rodrigues-developer-tools` (`Iv23li59lbd1aDC24pN8`). |
-| `MESH_PROFILE` | Optional | Set to `cluster` (or `CORTEX_GATEWAY_ENABLED=true`) to route via Cortex Gateway; defaults to `local` sovereign bundle execution. |
-| `CORTEX_GATEWAY_URL` | Optional | Envoy AgentGateway cluster URL (defaults to `http://localhost:8080`). |
 
 ---
 

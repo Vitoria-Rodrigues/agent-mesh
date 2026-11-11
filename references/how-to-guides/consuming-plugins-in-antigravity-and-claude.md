@@ -122,8 +122,7 @@ When plugins are loaded from `node_modules/@vitoria-rodrigues/agent-mesh/plugins
 
 1. **Plugin Launcher (`plugins/packages/<plugin>/scripts/launcher.cjs`)**:
    - Loads environment variables in cascade (`process.cwd()/.env`, parent `.env`) via `loadEnvCascade()`.
-   - When `MESH_PROFILE=cluster` or `CORTEX_GATEWAY_ENABLED=true`, routes requests to the Kubernetes Cortex Gateway (`npx -y mcp-remote ${CORTEX_GATEWAY_URL}/mcp`).
-   - Otherwise, executes `resolveMcpLauncher(pkgName, monorepoDir)` to locate the target MCP server across three deterministic layers:
+   - Executes `resolveMcpLauncher(pkgName, monorepoDir)` to locate the target MCP server across three deterministic layers:
      1. **Standalone Package**: `@vitoria-rodrigues/mcp-<name>` if installed directly in `node_modules`.
      2. **Umbrella Package Hierarchy**: `node_modules/@vitoria-rodrigues/agent-mesh/mcp/servers/<name>/scripts/launcher.cjs`.
      3. **Monorepo Sibling**: `mcp/servers/<name>/scripts/launcher.cjs` during local `agent-mesh` development.

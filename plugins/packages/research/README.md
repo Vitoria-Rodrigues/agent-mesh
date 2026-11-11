@@ -40,8 +40,6 @@ The underlying MCP servers consumed by this plugin require the following environ
 | `FIRECRAWL_API_KEY` | Optional (if local Firecrawl offline) | Firecrawl Cloud API key for web search and scraping. |
 | `FIRECRAWL_API_URL` | Optional | Custom Firecrawl instance URL (defaults to cloud API). |
 | `CONTEXT7_API_KEY` | Optional | Upstash Context7 API key if querying beyond public rate limits. |
-| `MESH_PROFILE` | Optional | Set to `cluster` (or `CORTEX_GATEWAY_ENABLED=true`) to route via Cortex Gateway; defaults to `local` sovereign bundle execution. |
-| `CORTEX_GATEWAY_URL` | Optional | Envoy AgentGateway cluster URL (defaults to `http://localhost:8080`). |
 
 ---
 

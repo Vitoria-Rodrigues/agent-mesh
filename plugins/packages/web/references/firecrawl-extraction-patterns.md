@@ -1,6 +1,6 @@
 # Firecrawl Extraction & Web Scraping Patterns
 
-Reference guide for extracting high-fidelity content and mapping domain structures using `cortex-firecrawl`.
+Reference guide for extracting high-fidelity content and mapping domain structures using `mcp-firecrawl`.
 
 ---
 

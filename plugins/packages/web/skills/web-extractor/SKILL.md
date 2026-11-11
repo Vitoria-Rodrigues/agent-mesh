@@ -5,7 +5,7 @@ description: Scrapes web pages, maps domain hierarchies, and extracts clean mark
 
 # Web Scraper
 
-Guides the scraping, crawling, and structured extraction of web content into clean Markdown using the **Firecrawl MCP Server** (`cortex-firecrawl`).
+Guides the scraping, crawling, and structured extraction of web content into clean Markdown using the **Firecrawl MCP Server** (`mcp-firecrawl`).
 
 ---
 

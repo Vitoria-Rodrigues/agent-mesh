@@ -113,15 +113,7 @@ if (!serviceConfig) {
   process.exit(1);
 }
 
-const profile = process.env.MESH_PROFILE || 'local';
-const isClusterMode = profile === 'cluster' || process.env.CORTEX_GATEWAY_ENABLED === 'true';
-const gatewayBaseUrl = process.env.CORTEX_GATEWAY_URL || 'http://localhost:8080';
-
-if (isClusterMode) {
-  process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging cluster gateway for '${targetService}' via ${gatewayBaseUrl}/mcp\n`);
-  const child = spawnCommand('npx', ['-y', 'mcp-remote', `${gatewayBaseUrl}/mcp`]);
-  child.on('exit', (code) => process.exit(code || 0));
-} else if (serviceConfig.monorepoDir) {
+if (serviceConfig.monorepoDir) {
   const resolved = resolveMcpLauncher(serviceConfig.pkg, serviceConfig.monorepoDir);
 
   if (resolved) {

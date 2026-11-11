@@ -38,14 +38,14 @@ MCP server execution is governed by self-contained launchers co-located inside e
 
 ### Tier 1: Domain Plugin Launchers (`plugins/packages/<plugin>/scripts/launcher.cjs`)
 1. Cascades `.env` file discovery deterministically from `process.cwd()` and parent directories (`loadEnvCascade()`).
-2. If `MESH_PROFILE=cluster` or `CORTEX_GATEWAY_ENABLED=true`, routes requests to the Kubernetes Cortex Gateway via `npx -y mcp-remote ${CORTEX_GATEWAY_URL}/mcp`.
-3. In `local` profile (default), resolves the target MCP server via `resolveMcpLauncher(pkgName, monorepoDir)` across three layers:
+2. Resolves the target MCP server via `resolveMcpLauncher(pkgName, monorepoDir)` across three layers:
    - **Layer 1**: Standalone installed package (`@vitoria-rodrigues/mcp-<service>`).
    - **Layer 2**: Umbrella package hierarchy (`node_modules/@vitoria-rodrigues/agent-mesh/mcp/servers/<service>/scripts/launcher.cjs`).
    - **Layer 3**: Monorepo sibling (`mcp/servers/<service>/scripts/launcher.cjs`).
+3. If no local package exists, directly delegates to the verified upstream package (`@playwright/mcp`, `mcp-server-linkedin`, `@upstash/context7-mcp`).
 
 ### Tier 2: Sovereign MCP Server Launchers (`mcp/servers/<server>/scripts/launcher.cjs`)
 1. Packaged inside each MCP server directory and exposed as the package `bin` (`mcp-<server>`).
 2. Loads environment variables via `loadEnvCascade()`.
-3. Spawns the co-located, `tsup`-bundled CommonJS binary `dist/bin.cjs` via `node` with zero external runtime dependencies.
-4. For `mcp-playwright`, checks if `playwright` is resolvable locally; if absent in external consumer repositories, falls back transparently to `npx -y @playwright/mcp@0.0.84` with configured mode flags.
+3. Manages upstream execution or spawns the co-located, `tsup`-bundled CommonJS binary `dist/bin.cjs` via `node` with zero external runtime dependencies.
+4. For `mcp-playwright` and `mcp-linkedin`, defaults to upstream runners (`@playwright/mcp` and `uvx mcp-server-linkedin`) with automated session and browser configuration.

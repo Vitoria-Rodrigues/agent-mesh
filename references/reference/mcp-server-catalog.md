@@ -35,7 +35,7 @@ To enable frictionless consumption across external repositories (such as `omnich
    - Packaged directly within each MCP server (`mcp/servers/<name>/scripts/launcher.cjs`).
    - Automatically executes `loadEnvCascade()` across parent directories to inject environment configurations.
    - Dispatches directly to the co-located bundled binary `dist/bin.cjs` with standard Node.js without requiring path traversals outside its package structure.
-   - Supports Cluster Gateway fallback (`MESH_PROFILE=cluster`) via `CORTEX_GATEWAY_URL`.
+   - Manages upstream delegation or native bundles based on environment configuration.
 3. **Declarative MCP Stdio Specification (`mcp.json`)**:
    - Each MCP server ships its own `mcp.json` declaring its executable command (`node ./scripts/launcher.cjs`), allowing direct inclusion in Antigravity or Claude Code configurations.
 4. **Playwright Resilient Fallback (`mcp-playwright`)**:

@@ -31,7 +31,7 @@ This document defines the bounded context router for all Antigravity and Claude 
 2. **Sovereign Two-Tier Launcher MCP Integration**:
    - Native Antigravity: `mcp_config.json` targeting `./scripts/launcher.cjs`.
    - Cross-vendor Agent Plugins 1.0.0: `mcp.json` with explicit `"type": "stdio"` targeting `./scripts/launcher.cjs`.
-   - **Three-Layer Resolution (`resolveMcpLauncher()`)**: Plugin launchers resolve their target MCP server without external path assumptions: (1) standalone `@vitoria-rodrigues/mcp-<name>` package, (2) umbrella package `mcp/servers/<name>/scripts/launcher.cjs` (spawning self-contained `dist/bin.cjs`), or (3) monorepo sibling directory. When `MESH_PROFILE=cluster` or `CORTEX_GATEWAY_ENABLED=true`, launchers route to the Kubernetes Cortex Gateway via `mcp-remote`.
+   - **Three-Layer Resolution (`resolveMcpLauncher()`)**: Plugin launchers resolve their target MCP server without external path assumptions: (1) standalone `@vitoria-rodrigues/mcp-<name>` package, (2) umbrella package `mcp/servers/<name>/scripts/launcher.cjs` (spawning self-contained `dist/bin.cjs`), or (3) monorepo sibling directory, with automatic delegation to upstream runners when configured.
    - **Dynamic Browser Execution**: `web` delegates Playwright operations to `@vitoria-rodrigues/mcp-playwright/scripts/launcher.cjs`, which runs the local bundle when `playwright` is installed or falls back resiliently to `@playwright/mcp@0.0.84` in unbundled consumers.
 3. **Strict Validation**:
    - Every domain plugin MUST pass `agy plugin validate <dir> --strict` (or `pnpm plugins:validate` from the monorepo root) with zero errors and zero warnings.

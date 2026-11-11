@@ -15,7 +15,7 @@ This bounded context encapsulates the in-house Model Context Protocol server pro
 
 ## Directory Layout
 
-- [scripts/launcher.cjs](./scripts/launcher.cjs): Sovereign MCP launcher (`bin: mcp-playwright`) managing `.env` cascade, local `playwright` resolution (`dist/bin.cjs`), upstream `@playwright/mcp@0.0.84` fallback, and Cortex Gateway routing.
+- [scripts/launcher.cjs](./scripts/launcher.cjs): Sovereign MCP launcher (`bin: mcp-playwright`) managing `.env` cascade, upstream `@playwright/mcp@0.0.84` delegation, and local `dist/bin.cjs` fallback execution.
 - [mcp.json](./mcp.json): Agent Plugins 1.0.0 stdio server configuration targeting `./scripts/launcher.cjs`.
 - [tsup.config.ts](./tsup.config.ts): Declarative `tsup` configuration inlining `@modelcontextprotocol/sdk`, `fastify`, `zod`, `dotenv`, and `ws` while keeping `playwright` and `playwright-core` external.
 - [src/bin.ts](./src/bin.ts): Stdio transport entrypoint executing the MCP server over standard input/output.

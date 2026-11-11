@@ -1,6 +1,6 @@
 # Firecrawl Scraping & Crawling Parameter Reference
 
-The `cortex-firecrawl` MCP server provides tools to scrape, crawl, search, and map websites.
+The `mcp-firecrawl` server provides tools to scrape, crawl, search, and map websites.
 
 ---
 

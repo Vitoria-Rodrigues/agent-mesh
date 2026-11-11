@@ -5,7 +5,7 @@ description: Executes deep web scraping, crawling, site mapping, and structured 
 
 # Web Deep Researcher
 
-Automates the discovery, mapping, scraping, and content extraction of external websites using the **Firecrawl MCP Server** (`cortex-firecrawl`).
+Automates the discovery, mapping, scraping, and content extraction of external websites using the **Firecrawl MCP Server** (`mcp-firecrawl`).
 
 ---
 

@@ -21,7 +21,7 @@ This document defines the bounded context router for release orchestration scrip
    - Stage 2: Root umbrella package publication via `node ./scripts/publish-root.cjs` (publishes `@vitoria-rodrigues/agent-mesh` and treats `409 Conflict` / `E409` as an idempotent no-op).
 2. **Two-Tier Sovereign Launchers Architecture**:
    - The legacy root router script has been retired.
-   - **Tier 1 - Plugin Launchers (`plugins/packages/<plugin>/scripts/launcher.cjs`)**: Resolve target MCP servers deterministically via `resolveMcpLauncher()` (standalone package -> umbrella hierarchy -> monorepo sibling) or route to the cluster gateway (`MESH_PROFILE=cluster`).
+   - **Tier 1 - Plugin Launchers (`plugins/packages/<plugin>/scripts/launcher.cjs`)**: Resolve target MCP servers deterministically via `resolveMcpLauncher()` (standalone package -> umbrella hierarchy -> monorepo sibling) or upstream packages.
    - **Tier 2 - MCP Server Launchers (`mcp/servers/<server>/scripts/launcher.cjs`)**: Load `.env` in cascade and spawn the co-located self-contained CommonJS bundle `dist/bin.cjs` (with resilient upstream `@playwright/mcp@0.0.84` fallback in `mcp-playwright` when local `playwright` packages are absent).
 
 ## Operational Guardrails

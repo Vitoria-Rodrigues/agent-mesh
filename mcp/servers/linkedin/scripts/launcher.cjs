@@ -165,49 +165,32 @@ function resolveUpstreamArgs(forwarded = []) {
 }
 
 const forwardedArgs = process.argv.slice(2);
-const profile = process.env.MESH_PROFILE || 'local';
-const isClusterMode = profile === 'cluster' || process.env.CORTEX_GATEWAY_ENABLED === 'true';
-const gatewayBaseUrl = process.env.CORTEX_GATEWAY_URL || 'http://localhost:8080';
+const isNativeRequested = (process.env.LINKEDIN_ENGINE || '').trim().toLowerCase() === 'native';
+const bundledBin = path.resolve(__dirname, '..', 'dist', 'bin.cjs');
+const srcTsBin = path.resolve(__dirname, '..', 'src', 'bin.ts');
 
-if (isClusterMode) {
-  process.stderr.write(`[launcher:mcp-${SERVER_NAME}] Engaging cluster gateway via ${gatewayBaseUrl}/mcp\n`);
-  const child = spawnCommand('npx', ['-y', 'mcp-remote', `${gatewayBaseUrl}/mcp`]);
+if (isNativeRequested && fs.existsSync(bundledBin)) {
+  const child = spawn(process.execPath, [bundledBin, ...forwardedArgs], {
+    stdio: 'inherit',
+    shell: false,
+    env: process.env
+  });
   child.on('exit', (code) => process.exit(code || 0));
-} else if (isUpstreamEngineRequested()) {
+  child.on('error', (err) => {
+    process.stderr.write(`[launcher:mcp-${SERVER_NAME}] Failed to spawn bundled binary: ${err.message}\n`);
+    process.exit(1);
+  });
+} else if (isNativeRequested && fs.existsSync(srcTsBin)) {
+  const child = spawnCommand('npx', ['-y', 'tsx', srcTsBin, ...forwardedArgs]);
+  child.on('exit', (code) => process.exit(code || 0));
+} else {
+  // Primary execution: upstream runner
   const upstreamArgs = resolveUpstreamArgs(forwardedArgs);
-  process.stderr.write(`[launcher:mcp-${SERVER_NAME}] Engaging upstream engine: uvx ${upstreamArgs.join(' ')}\n`);
+  process.stderr.write(`[launcher:mcp-${SERVER_NAME}] Engaging primary upstream runner: uvx ${upstreamArgs.join(' ')}\n`);
   const child = spawnCommand('uvx', upstreamArgs);
   child.on('exit', (code) => process.exit(code || 0));
   child.on('error', (err) => {
     process.stderr.write(`[launcher:mcp-${SERVER_NAME}] Upstream uvx runner failed: ${err.message}. Ensure uv is installed.\n`);
     process.exit(1);
   });
-} else {
-  const bundledBin = path.resolve(__dirname, '..', 'dist', 'bin.cjs');
-  const srcTsBin = path.resolve(__dirname, '..', 'src', 'bin.ts');
-
-  if (fs.existsSync(bundledBin)) {
-    const child = spawn(process.execPath, [bundledBin, ...forwardedArgs], {
-      stdio: 'inherit',
-      shell: false,
-      env: process.env
-    });
-    child.on('exit', (code) => process.exit(code || 0));
-    child.on('error', (err) => {
-      process.stderr.write(`[launcher:mcp-${SERVER_NAME}] Failed to spawn bundled binary: ${err.message}\n`);
-      process.exit(1);
-    });
-  } else if (fs.existsSync(srcTsBin)) {
-    const child = spawnCommand('npx', ['-y', 'tsx', srcTsBin, ...forwardedArgs]);
-    child.on('exit', (code) => process.exit(code || 0));
-  } else {
-    const upstreamArgs = resolveUpstreamArgs(forwardedArgs);
-    process.stderr.write(`[launcher:mcp-${SERVER_NAME}] Engaging upstream fallback runner: uvx ${upstreamArgs.join(' ')}\n`);
-    const child = spawnCommand('uvx', upstreamArgs);
-    child.on('exit', (code) => process.exit(code || 0));
-    child.on('error', (err) => {
-      process.stderr.write(`[launcher:mcp-${SERVER_NAME}] Upstream uvx runner failed: ${err.message}. Ensure uv is installed.\n`);
-      process.exit(1);
-    });
-  }
 }

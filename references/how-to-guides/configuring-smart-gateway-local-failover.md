@@ -1,22 +1,24 @@
-# How to Configure Sovereign Launcher & Cluster Gateway Routing
+# How to Configure Sovereign Launchers & Upstream Execution
 
-This guide explains how the two-tier launcher architecture (`plugins/packages/<plugin>/scripts/launcher.cjs` and `mcp/servers/<server>/scripts/launcher.cjs`) routes Model Context Protocol (MCP) tool execution between local self-contained CommonJS bundles (`dist/bin.cjs`) and the cloud-native Kubernetes Cortex Gateway.
+This guide explains how the two-tier launcher architecture (`plugins/packages/<plugin>/scripts/launcher.cjs` and `mcp/servers/<server>/scripts/launcher.cjs`) routes Model Context Protocol (MCP) tool execution between local self-contained CommonJS bundles (`dist/bin.cjs`) and verified upstream packages (`@playwright/mcp`, `mcp-server-linkedin`, `@upstash/context7-mcp`).
 
 ---
 
-## 1. Routing Modes Overview
+## 1. Routing Model Overview
 
-When an AI agent invokes an MCP tool, the launcher inspects the active runtime profile:
+When an AI agent invokes an MCP tool, the launcher inspects the active runtime configuration:
 
-1. **Local Sovereign Mode (`MESH_PROFILE=local` - Default)**:
+1. **Local Sovereign Resolution (Default)**:
    - The plugin launcher executes `resolveMcpLauncher(pkgName, monorepoDir)`, locating the target MCP server across:
      1. Standalone installed package (`@vitoria-rodrigues/mcp-<service>`).
      2. Umbrella package hierarchy (`node_modules/@vitoria-rodrigues/agent-mesh/mcp/servers/<service>/scripts/launcher.cjs`).
      3. Monorepo sibling directory (`mcp/servers/<service>/scripts/launcher.cjs`).
    - The target MCP server launcher spawns its co-located, self-contained bundle `dist/bin.cjs` over Stdio.
-   - For `mcp-playwright`, if `playwright` is not installed in the consumer workspace, it automatically falls back to `npx -y @playwright/mcp@0.0.84` with configured mode flags.
-2. **Cluster Gateway Mode (`MESH_PROFILE=cluster` or `CORTEX_GATEWAY_ENABLED=true`)**:
-   - The launcher routes JSON-RPC requests over Streamable HTTP/SSE to the Kubernetes Cortex Gateway via `npx -y mcp-remote ${CORTEX_GATEWAY_URL}/mcp`.
+
+2. **Upstream Engine Delegation**:
+   - For tools with verified ecosystem distributions (such as Playwright and LinkedIn):
+     - **Playwright**: Defaults to `npx -y @playwright/mcp@0.0.84` preserving all mode flags (`headless`, `extension`, `channel`, `cdp`), with native bundle fallback.
+     - **LinkedIn**: When `LINKEDIN_ENGINE=upstream` (default), delegates directly to `uvx mcp-server-linkedin@latest` with auto-imported browser sessions (`--import-from-browser auto`) and candidate resume indexing.
 
 ---
 
@@ -24,9 +26,12 @@ When an AI agent invokes an MCP tool, the launcher inspects the active runtime p
 
 | Variable | Default Value | Description |
 | :--- | :--- | :--- |
-| `MESH_PROFILE` | `local` | Execution profile selector (`local` for sovereign Stdio bundles; `cluster` for Cortex Gateway proxy). |
-| `CORTEX_GATEWAY_ENABLED` | `false` | When set to `true`, forces cluster gateway routing even if `MESH_PROFILE` is unset. |
-| `CORTEX_GATEWAY_URL` | `http://localhost:8080` | Base URL of the Envoy AgentGateway ingress. |
+| `LINKEDIN_ENGINE` | `upstream` | Engine selector: `upstream` (`uvx`) or `native` (in-house bundle). |
+| `LINKEDIN_USE_UPSTREAM` | `true` | Boolean flag enforcing upstream `uvx mcp-server-linkedin` delegation. |
+| `LINKEDIN_BROWSER` | `auto` | Browser target for local session cookie auto-import. |
+| `LINKEDIN_HEADLESS` | `true` | Run upstream browser in headless mode (`false` for visible GUI). |
+| `PLAYWRIGHT_MODE` | `auto` | Browser automation mode (`auto`, `extension`, `headless`, `channel`, `cdp`). |
+| `PLAYWRIGHT_HEADLESS` | `true` | Headless execution for background Chromium jobs. |
 
 ---
 
@@ -37,13 +42,13 @@ Both plugin launchers and MCP server launchers automatically scan for `.env` fil
 2. `process.cwd()/../.env`
 3. Package-local and parent monorepo `.env` files (`agent-mesh/.env`, `org-core/.env`)
 
-Variables already defined in `process.env` are never overwritten.
+Variables already defined in `process.env` are never overwritten. Template placeholders (`<YOUR_*>`) are automatically filtered and ignored.
 
 ---
 
 ## 4. Verifying Execution Locally and in Consumer Repositories
 
-### 4.1 Verify Sovereign Local Execution (Default `local` Profile)
+### 4.1 Verify Sovereign Local Execution
 
 From `agent-mesh` or an external consumer repository (such as `omnichannel`):
 
@@ -54,21 +59,19 @@ node plugins/packages/research/scripts/launcher.cjs firecrawl --help
 Expected output on `stderr`:
 ```text
 [launcher:research] Engaging sovereign MCP executable for 'firecrawl': node .../mcp/servers/firecrawl/scripts/launcher.cjs
-Firecrawl MCP server running on stdio
 ```
 
-### 4.2 Verify Cluster Gateway Routing (`cluster` Profile)
+### 4.2 Verify Upstream Delegation
 
-Port-forward the Cortex Gateway service on `:8080` and set `MESH_PROFILE=cluster`:
+Test LinkedIn launcher delegating to upstream runner:
 
 ```bash
-kubectl port-forward -n cortex svc/agentgateway 8080:8080
-MESH_PROFILE=cluster node plugins/packages/research/scripts/launcher.cjs firecrawl
+node plugins/packages/linkedin/scripts/launcher.cjs
 ```
 
 Expected output on `stderr`:
 ```text
-[launcher:research] Engaging cluster gateway for 'firecrawl' via http://localhost:8080/mcp
+[launcher:mcp-linkedin] Engaging upstream runner: uvx mcp-server-linkedin@latest ...
 ```
 
 ---

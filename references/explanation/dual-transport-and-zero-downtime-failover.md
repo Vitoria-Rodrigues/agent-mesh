@@ -53,18 +53,17 @@ Each MCP-enabled domain plugin (`plugins/packages/<plugin>/scripts/launcher.cjs`
           ▼
 [Plugin Launcher: plugins/packages/<plugin>/scripts/launcher.cjs]
           │
-          ├── (MESH_PROFILE=cluster or CORTEX_GATEWAY_ENABLED=true)
-          │         └──► Spawns npx -y mcp-remote ${CORTEX_GATEWAY_URL}/mcp
-          │
-          └── (MESH_PROFILE=local [default]: resolveMcpLauncher())
+          └── (resolveMcpLauncher())
                     ├── 1. Standalone Package (@vitoria-rodrigues/mcp-<target>)
                     ├── 2. Umbrella Package (node_modules/@vitoria-rodrigues/agent-mesh/mcp/servers/<target>)
-                    └── 3. Monorepo Sibling (mcp/servers/<target>)
-                              │
-                              ▼
-                    [Sovereign MCP Launcher: mcp/servers/<target>/scripts/launcher.cjs]
-                              │
-                              └──► Spawns node dist/bin.cjs (or @playwright/mcp@0.0.84 fallback)
+                    ├── 3. Monorepo Sibling (mcp/servers/<target>)
+                    │         │
+                    │         ▼
+                    │   [Sovereign MCP Launcher: mcp/servers/<target>/scripts/launcher.cjs]
+                    │         │
+                    │         └──► Spawns node dist/bin.cjs (or upstream delegation)
+                    │
+                    └── 4. Upstream Package (e.g., @playwright/mcp, uvx mcp-server-linkedin)
 ```
 
 ### Why Persist `dist/*.cjs` and Separate Launchers?
