@@ -69,7 +69,7 @@ node_modules/@vitoria-rodrigues/agent-mesh/
 │   └── servers/
 │       ├── firecrawl/       (Sovereign launcher scripts/launcher.cjs + self-contained dist/bin.cjs)
 │       ├── github-flow/     (Sovereign launcher scripts/launcher.cjs + self-contained dist/bin.cjs)
-│       ├── memory/          (Sovereign launcher scripts/launcher.cjs + self-contained dist/bin.cjs)
+│       ├── linkedin/        (Sovereign launcher scripts/launcher.cjs + self-contained dist/bin.cjs)
 │       └── playwright/      (Sovereign launcher scripts/launcher.cjs + dist/bin.cjs + upstream fallback)
 ├── presets/
 │   ├── all.json             (References all 6 domain plugins)

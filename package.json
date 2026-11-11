@@ -32,8 +32,6 @@
     "mcp:github-flow:dev": "pnpm --filter @vitoria-rodrigues/mcp-github-flow dev",
     "mcp:linkedin:build": "pnpm --filter @vitoria-rodrigues/mcp-linkedin build",
     "mcp:linkedin:dev": "pnpm --filter @vitoria-rodrigues/mcp-linkedin dev",
-    "mcp:memory:build": "pnpm --filter @vitoria-rodrigues/mcp-memory build",
-    "mcp:memory:dev": "pnpm --filter @vitoria-rodrigues/mcp-memory dev",
     "mcp:playwright:build": "pnpm --filter @vitoria-rodrigues/mcp-playwright build",
     "mcp:playwright:dev": "pnpm --filter @vitoria-rodrigues/mcp-playwright dev",
     "// Packaging & Deployment": "------------------------------------------------",

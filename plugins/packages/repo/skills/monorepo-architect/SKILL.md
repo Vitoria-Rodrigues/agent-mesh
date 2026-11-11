@@ -35,7 +35,7 @@ Package names must be derived deterministically according to the monorepo bounda
 | **Root Monorepo** | `/` | `@vitoria-rodrigues/agent-mesh` | `@vitoria-rodrigues/agent-mesh` |
 | **Agent Plugins** | `plugins/packages/<domain>` | `@vitoria-rodrigues/plugin-<domain>` | `@vitoria-rodrigues/plugin-atelier`<br />`@vitoria-rodrigues/plugin-docusaurus`<br />`@vitoria-rodrigues/plugin-github-flow`<br />`@vitoria-rodrigues/plugin-repo`<br />`@vitoria-rodrigues/plugin-research`<br />`@vitoria-rodrigues/plugin-web` |
 | **Plugin Core Libraries** | `plugins/core/<domain>` | `@vitoria-rodrigues/plugin-core-<domain>` | `@vitoria-rodrigues/plugin-core-governance` |
-| **MCP Servers** | `mcp/servers/<service>` | `@vitoria-rodrigues/mcp-<service>` | `@vitoria-rodrigues/mcp-firecrawl`<br />`@vitoria-rodrigues/mcp-github-flow`<br />`@vitoria-rodrigues/mcp-memory`<br />`@vitoria-rodrigues/mcp-playwright` |
+| **MCP Servers** | `mcp/servers/<service>` | `@vitoria-rodrigues/mcp-<service>` | `@vitoria-rodrigues/mcp-firecrawl`<br />`@vitoria-rodrigues/mcp-github-flow`<br />`@vitoria-rodrigues/mcp-linkedin`<br />`@vitoria-rodrigues/mcp-playwright` |
 | **MCP Core Libraries** | `mcp/core/<domain>` | `@vitoria-rodrigues/mcp-core-<domain>` | `@vitoria-rodrigues/mcp-core-github` |
 
 > [!IMPORTANT]

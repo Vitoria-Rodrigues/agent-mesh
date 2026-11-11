@@ -5,7 +5,6 @@
     { "path": "./mcp/core/github" },
     { "path": "./mcp/servers/firecrawl" },
     { "path": "./mcp/servers/github-flow" },
-    { "path": "./mcp/servers/memory" },
     { "path": "./mcp/servers/playwright" },
     { "path": "./mcp/servers/linkedin" }
   ]

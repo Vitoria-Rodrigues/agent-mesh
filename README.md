@@ -50,7 +50,7 @@ agent-mesh/
 │       ├── research/        # @vitoria-rodrigues/plugin-research (Context7 + Firecrawl)
 │       ├── web/             # @vitoria-rodrigues/plugin-web (Multi-mode Playwright + Firecrawl)
 │       └── linkedin/        # @vitoria-rodrigues/plugin-linkedin (LinkedIn Profile & Easy Apply)
-├── mcp/                     # 5 In-House Dual-Transport MCP Servers & 1 Core Library
+├── mcp/                     # 4 In-House Dual-Transport MCP Servers & 1 Core Library
 │   ├── AGENTS.md            # MCP subsystem context router (Layer 2)
 │   ├── README.md            # MCP subsystem documentation
 │   ├── core/                # Shared MCP libraries (Layer 3)
@@ -59,7 +59,6 @@ agent-mesh/
 │       ├── firecrawl/       # @vitoria-rodrigues/mcp-firecrawl (dist/bin.cjs + scripts/launcher.cjs)
 │       ├── github-flow/     # @vitoria-rodrigues/mcp-github-flow (Tier 3 Developer Workflows)
 │       ├── linkedin/        # @vitoria-rodrigues/mcp-linkedin (Profile, Easy Apply & Resumes)
-│       ├── memory/          # @vitoria-rodrigues/mcp-memory (dist/bin.cjs + scripts/launcher.cjs)
 │       └── playwright/      # @vitoria-rodrigues/mcp-playwright (Sovereign engine + upstream fallback)
 ├── scripts/
 │   ├── AGENTS.md            # Scripts subsystem context router (Layer 2)

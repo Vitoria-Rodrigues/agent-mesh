@@ -128,7 +128,7 @@ When plugins are loaded from `node_modules/@vitoria-rodrigues/agent-mesh/plugins
      2. **Umbrella Package Hierarchy**: `node_modules/@vitoria-rodrigues/agent-mesh/mcp/servers/<name>/scripts/launcher.cjs`.
      3. **Monorepo Sibling**: `mcp/servers/<name>/scripts/launcher.cjs` during local `agent-mesh` development.
 2. **Sovereign MCP Server Launcher (`mcp/servers/<name>/scripts/launcher.cjs`) & Bundle (`dist/bin.cjs`)**:
-   - Each of the 4 MCP servers (`firecrawl`, `github-flow`, `memory`, `playwright`) contains its own `scripts/launcher.cjs` and pre-built CommonJS bundle `dist/bin.cjs`.
+   - Each of the 4 MCP servers (`firecrawl`, `github-flow`, `linkedin`, `playwright`) contains its own `scripts/launcher.cjs` and pre-built CommonJS bundle `dist/bin.cjs`.
    - Built with `tsup` (`noExternal`), `dist/bin.cjs` inlines `@modelcontextprotocol/sdk`, `@octokit/*`, `fastify`, `zod`, and `dotenv`. Consumer repositories never need to install MCP SDK packages in their own `package.json`.
 3. **Playwright Sovereign-or-Upstream Resolution**:
    - In `mcp/servers/playwright/scripts/launcher.cjs`, the launcher checks whether `playwright` driver packages are resolvable in the consumer workspace.

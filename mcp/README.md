@@ -21,7 +21,6 @@ The `mcp/` subsystem enforces **Subsystem-Internal Partitioning** and **Self-Con
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | [servers/firecrawl/](./servers/firecrawl/README.md) | `@vitoria-rodrigues/mcp-firecrawl` | `scripts/launcher.cjs`<br>`dist/bin.cjs` / `dist/index.cjs` | `:8080` | Production Active | Deep web scraping, crawling, site mapping, and markdown extraction. |
 | [servers/github-flow/](./servers/github-flow/README.md) | `@vitoria-rodrigues/mcp-github-flow` | `scripts/launcher.cjs`<br>`dist/bin.cjs` / `dist/index.cjs` | `:8080` | Production Active | Tier 3 developer Git workflows, branches, pull requests, and Actions diagnostics. |
-| [servers/memory/](./servers/memory/README.md) | `@vitoria-rodrigues/mcp-memory` | `scripts/launcher.cjs`<br>`dist/bin.cjs` / `dist/index.cjs` | `:8080` | Production Active | Semantic RAG vector store, episodic memory, and chat history. |
 | [servers/playwright/](./servers/playwright/README.md) | `@vitoria-rodrigues/mcp-playwright` | `scripts/launcher.cjs`<br>`dist/bin.cjs` / `dist/index.cjs` | `:8080` | Production Active (Sovereign + Fallback) | Executes local `dist/bin.cjs` when `playwright` is installed; falls back to `@playwright/mcp@0.0.84` when unbundled in external consumers. |
 | [servers/linkedin/](./servers/linkedin/README.md) | `@vitoria-rodrigues/mcp-linkedin` | `scripts/launcher.cjs`<br>`dist/bin.cjs` / `dist/index.cjs` | `:8080` | Production Active | LinkedIn profile optimization, job matching, Easy Apply automation, and candidate resume catalog management. |
 
@@ -56,6 +55,6 @@ pnpm mcp:clean
 pnpm mcp:core-github:build
 pnpm mcp:firecrawl:build
 pnpm mcp:github-flow:build
-pnpm mcp:memory:build
+pnpm mcp:linkedin:build
 pnpm mcp:playwright:build
 ```

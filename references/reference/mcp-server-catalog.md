@@ -18,7 +18,7 @@ Every MCP server package in `mcp/servers/*` implements two execution entrypoints
 | :--- | :--- | :--- | :--- | :--- |
 | `mcp/servers/firecrawl` | `@vitoria-rodrigues/mcp-firecrawl` | `dist/bin.cjs` / `scripts/launcher.cjs` | `:8080` | Deep web scraping, crawling, domain mapping, and markdown extraction. |
 | `mcp/servers/github-flow` | `@vitoria-rodrigues/mcp-github-flow` | `dist/bin.cjs` / `scripts/launcher.cjs` | `:8080` | Tier 3 developer Git workflows, branches, pull requests, and Actions diagnostics. |
-| `mcp/servers/memory` | `@vitoria-rodrigues/mcp-memory` | `dist/bin.cjs` / `scripts/launcher.cjs` | `:8080` | Semantic RAG vector store, episodic memory, and knowledge graph. |
+| `mcp/servers/linkedin` | `@vitoria-rodrigues/mcp-linkedin` | `dist/bin.cjs` / `scripts/launcher.cjs` | `:8080` | LinkedIn profile optimization, job matching, Easy Apply automation, and candidate resume catalog management. |
 | `mcp/servers/playwright` | `@vitoria-rodrigues/mcp-playwright` | `dist/bin.cjs` / `scripts/launcher.cjs` | `:8080` | Universal browser automation, extension bridge, and ARIA snapshots. |
 | `mcp/core/github` | `@vitoria-rodrigues/mcp-core-github` | `dist/index.js` *(Library)* | N/A | Shared Three-Tier GitHub App authentication, Octokit client factory, and Zod schemas. |
 
@@ -62,11 +62,15 @@ To enable frictionless consumption across external repositories (such as `omnich
 - `list_workflow_runs`: Lists GitHub Actions workflow runs for a repository.
 - `get_workflow_run`: Retrieves execution status, conclusion, and timing for a specific workflow run.
 
-### 3. `@vitoria-rodrigues/mcp-memory`
-- `search_knowledge`: RAG vector similarity search over indexed documentation.
-- `store_episodic`: Persists a conversation turn in episodic chat history.
-- `query_graph`: Traverses knowledge graph from an entity by depth.
-- `ingest_document`: Triggers document ingestion and indexing pipeline.
+### 3. `@vitoria-rodrigues/mcp-linkedin`
+- `get_my_profile`: Extracts full candidate profile including headline, experience, and skills.
+- `search_jobs`: Multi-vector job search matching titles, location, and keywords.
+- `get_job_details`: Fetches job description, requirements, and hiring team context.
+- `get_easy_apply_form`: Parses multi-step Easy Apply modal form schemas in dry-run mode.
+- `submit_easy_apply`: Submits application to LinkedIn (gated: requires explicit user confirmation).
+- `list_resumes`: Scans `$PLUGIN_DATA/resumes/` for tailored candidate CVs.
+- `connect_with_person`: Dispatches invitation note to recruiter (gated: requires confirmation).
+- `send_message`: Dispatches direct message or InMail (gated: requires confirmation).
 
 ### 4. `@vitoria-rodrigues/mcp-playwright`
 - `browser_navigate`: Navigates active tab to target URL.

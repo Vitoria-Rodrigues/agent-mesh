@@ -42,7 +42,7 @@ Turborepo coordinates topological builds across:
 - `mcp/core/github` (`tsc` build producing `dist/index.js` and `.d.ts` declarations)
 - `mcp/servers/firecrawl`
 - `mcp/servers/github-flow`
-- `mcp/servers/memory`
+- `mcp/servers/linkedin`
 - `mcp/servers/playwright`
 
 Each server in `mcp/servers/*` uses a declarative `tsup.config.ts` (`noExternal`) to produce two self-contained CommonJS entrypoints:
