@@ -31,6 +31,7 @@ function loadEnvCascade() {
           if (eqIdx > 0) {
             const k = trimmed.slice(0, eqIdx).trim();
             const v = trimmed.slice(eqIdx + 1).trim();
+            if (v.startsWith('<YOUR_') && v.endsWith('>')) continue;
             if (!process.env[k]) process.env[k] = v;
           }
         }
