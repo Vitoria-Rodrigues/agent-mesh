@@ -79,7 +79,7 @@ const resolvedResumesDir = initializeResumesDirectory();
 
 function spawnCommand(bin, args, options = {}) {
   const isWin = process.platform === 'win32';
-  if (isWin && (bin === 'npx' || bin.endsWith('.cmd') || bin.endsWith('.bat'))) {
+  if (isWin && (bin === 'npx' || bin === 'uvx' || bin === 'uv' || bin.endsWith('.cmd') || bin.endsWith('.bat'))) {
     return spawn('cmd.exe', ['/d', '/s', '/c', bin, ...args], {
       stdio: 'inherit',
       shell: false,
@@ -93,6 +93,46 @@ function spawnCommand(bin, args, options = {}) {
     env: process.env,
     ...options
   });
+}
+
+function isUpstreamEngineRequested() {
+  const engine = (process.env.LINKEDIN_ENGINE || '').trim().toLowerCase();
+  const useUpstream = (process.env.LINKEDIN_USE_UPSTREAM || '').trim().toLowerCase();
+  return engine === 'upstream' || engine === 'uvx' || useUpstream === 'true' || useUpstream === '1';
+}
+
+function resolveUpstreamArgs(forwarded = []) {
+  const upstreamPkg = process.env.LINKEDIN_UPSTREAM_PACKAGE || 'mcp-server-linkedin@latest';
+  const args = [upstreamPkg];
+
+  const hasImportBrowser = forwarded.some(
+    (arg) => arg === '--import-from-browser' || arg.startsWith('--import-from-browser=')
+  );
+  if (!hasImportBrowser) {
+    const browser = process.env.LINKEDIN_BROWSER || process.env.LINKEDIN_IMPORT_BROWSER || 'auto';
+    args.push('--import-from-browser', browser);
+  }
+
+  const hasHeadlessFlag = forwarded.some(
+    (arg) => arg === '--headless' || arg === '--no-headless'
+  );
+  if (!hasHeadlessFlag) {
+    if (process.env.LINKEDIN_HEADLESS === 'false' || process.env.LINKEDIN_NO_HEADLESS === 'true') {
+      args.push('--no-headless');
+    } else {
+      args.push('--headless');
+    }
+  }
+
+  const hasUserDataDir = forwarded.some(
+    (arg) => arg === '--user-data-dir' || arg.startsWith('--user-data-dir=')
+  );
+  if (!hasUserDataDir && process.env.LINKEDIN_USER_DATA_DIR) {
+    args.push('--user-data-dir', process.env.LINKEDIN_USER_DATA_DIR);
+  }
+
+  args.push(...forwarded);
+  return args;
 }
 
 function resolveMcpLauncher(pkgName, monorepoDir) {
@@ -154,37 +194,49 @@ if (isClusterMode) {
     process.exit(1);
   }
 
-  const resolved = resolveMcpLauncher(serviceConfig.pkg, serviceConfig.monorepoDir);
-
-  if (resolved) {
-    let child;
-    if (resolved.type === 'launcher') {
-      child = spawn(process.execPath, [resolved.path, ...forwardedArgs], {
-        stdio: 'inherit',
-        shell: false,
-        env: process.env
-      });
-    } else if (resolved.type === 'bin') {
-      child = spawn(process.execPath, [resolved.path, ...forwardedArgs], {
-        stdio: 'inherit',
-        shell: false,
-        env: process.env
-      });
-    } else if (resolved.type === 'ts') {
-      child = spawnCommand('npx', ['-y', 'tsx', resolved.path, ...forwardedArgs]);
-    }
+  if (targetService === 'linkedin' && isUpstreamEngineRequested()) {
+    const upstreamArgs = resolveUpstreamArgs(forwardedArgs);
+    process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging upstream engine for '${targetService}': uvx ${upstreamArgs.join(' ')}\n`);
+    const child = spawnCommand('uvx', upstreamArgs);
     child.on('exit', (code) => process.exit(code || 0));
     child.on('error', (err) => {
-      process.stderr.write(`[launcher:${PLUGIN_NAME}] Failed to spawn resolved launcher for '${targetService}': ${err.message}\n`);
+      process.stderr.write(`[launcher:${PLUGIN_NAME}] Upstream uvx runner failed: ${err.message}. Ensure uv is installed.\n`);
       process.exit(1);
     });
   } else {
-    process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging upstream fallback runner for '${targetService}': ${serviceConfig.upstream}\n`);
-    const child = spawnCommand('uvx', ['mcp-server-linkedin@latest', ...forwardedArgs]);
-    child.on('exit', (code) => process.exit(code || 0));
-    child.on('error', (err) => {
-      process.stderr.write(`[launcher:${PLUGIN_NAME}] Upstream fallback failed: ${err.message}. Ensure uv is installed.\n`);
-      process.exit(1);
-    });
+    const resolved = resolveMcpLauncher(serviceConfig.pkg, serviceConfig.monorepoDir);
+
+    if (resolved) {
+      let child;
+      if (resolved.type === 'launcher') {
+        child = spawn(process.execPath, [resolved.path, ...forwardedArgs], {
+          stdio: 'inherit',
+          shell: false,
+          env: process.env
+        });
+      } else if (resolved.type === 'bin') {
+        child = spawn(process.execPath, [resolved.path, ...forwardedArgs], {
+          stdio: 'inherit',
+          shell: false,
+          env: process.env
+        });
+      } else if (resolved.type === 'ts') {
+        child = spawnCommand('npx', ['-y', 'tsx', resolved.path, ...forwardedArgs]);
+      }
+      child.on('exit', (code) => process.exit(code || 0));
+      child.on('error', (err) => {
+        process.stderr.write(`[launcher:${PLUGIN_NAME}] Failed to spawn resolved launcher for '${targetService}': ${err.message}\n`);
+        process.exit(1);
+      });
+    } else {
+      const upstreamArgs = resolveUpstreamArgs(forwardedArgs);
+      process.stderr.write(`[launcher:${PLUGIN_NAME}] Engaging upstream fallback runner for '${targetService}': uvx ${upstreamArgs.join(' ')}\n`);
+      const child = spawnCommand('uvx', upstreamArgs);
+      child.on('exit', (code) => process.exit(code || 0));
+      child.on('error', (err) => {
+        process.stderr.write(`[launcher:${PLUGIN_NAME}] Upstream fallback failed: ${err.message}. Ensure uv is installed.\n`);
+        process.exit(1);
+      });
+    }
   }
 }

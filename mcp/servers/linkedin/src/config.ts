@@ -10,6 +10,10 @@ const defaultResumesDir = path.join(defaultPluginData, 'resumes');
 
 export const linkedinConfigSchema = z.object({
   PORT: z.coerce.number().default(8080),
+  LINKEDIN_ENGINE: z.string().default('native'),
+  LINKEDIN_USE_UPSTREAM: z.string().optional().default('false'),
+  LINKEDIN_IMPORT_BROWSER: z.string().optional().default('auto'),
+  LINKEDIN_HEADLESS: z.string().optional().default('true'),
   LINKEDIN_RESUMES_DIR: z.string().default(defaultResumesDir),
   LINKEDIN_SESSION_COOKIE: z.string().optional().default(''),
   LINKEDIN_ACCOUNT_EMAIL: z.string().optional().default(''),
